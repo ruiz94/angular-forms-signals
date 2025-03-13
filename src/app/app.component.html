@@ -1,8 +1,8 @@
 <div>
-  {{ totalValue() }}
+  <p>Total Values: {{ totalValue() }}</p>
   <button (click)="addItem()">Agregar Item</button>
 
-  @for (formGroup of items(); track formGroup.controls.id.value) {
+  @for (formGroup of customForm.controls.items.controls; track formGroup.controls.id.value) {
     <app-form-child [formGroup]="formGroup" />
   }
 </div>

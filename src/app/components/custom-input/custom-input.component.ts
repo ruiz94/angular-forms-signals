@@ -18,19 +18,6 @@ export class CustomInputComponent implements ControlValueAccessor{
   onTouched = () => {};
   onChange = (_value: any) => {}
 
-  constructor(){
-    effect( () => {
-      const currentSignalValue = this.control().value;
-      if(this.control().dirty || this.control().touched){
-        const newValue = this.control().value
-
-        if(newValue !== currentSignalValue){
-          this.onChange(newValue);
-        }
-      }
-    })
-  }
-
   writeValue(value: any): void {
     if(value !== this.control().value){
       this.control().setValue(value, { emitEvent: false });

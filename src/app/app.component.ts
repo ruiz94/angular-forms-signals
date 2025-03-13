@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormArray, FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormChildComponent } from './components/form-child/form-child.component';
-
+import { toSignal } from '@angular/core/rxjs-interop'
 export interface ItemForm {
   id: FormControl<number>,
   name: FormControl<string>,
@@ -30,23 +30,19 @@ export class AppComponent {
     items: this.formBuilder.array<CustomFormGroup>([])
   })
 
-  items = signal(this.customForm.controls.items.controls)
+  get items() {
+    return this.customForm.controls.items
+  }
+
+  itemsChanges = toSignal(this.customForm.valueChanges)
 
   totalValue = computed( () => {
-    const value = this.items().reduce( (total, formGroup) => total + Number(formGroup.controls.value.value), 0)
-    console.log('Computing total value: ', value)
+    const value = this.itemsChanges()?.items?.reduce( (total, item) => total + Number(item?.value) || 0, 0);
     return value;
   })
 
-  constructor(){
-    effect( () => {
-      this.customForm.controls.items.valueChanges.subscribe( () => {
-        this.items.set([ ...this.customForm.controls.items.controls ]);
-      })
-    })
-  }
   addItem() {
-    const id = this.items().length + 1;
+    const id = this.items.length + 1;
     const itemForm = this.formBuilder.group<ItemForm>({
       id: this.formBuilder.control(id),
       name: this.formBuilder.control('', { validators: [Validators.required]}),
@@ -54,7 +50,5 @@ export class AppComponent {
     });
 
     this.customForm.controls.items.push(itemForm);
-
-    this.items.set([ ...this.customForm.controls.items.controls])
   }
 }
